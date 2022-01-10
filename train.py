@@ -103,28 +103,28 @@ def train(epoch):
 def test(epoch):
     agent.eval()
     rewards, metrics, policies, set_labels = [], [], [], []
-    for batch_idx, (inputs, targets) in tqdm.tqdm(enumerate(testloader), total=len(testloader)):
 
-        inputs = Variable(inputs, volatile=True)
-        if not args.parallel:
-            inputs = inputs.cuda()
+    with torch.no_grad():
+        for batch_idx, (inputs, targets) in tqdm.tqdm(enumerate(testloader), total=len(testloader)):
+            if not args.parallel:
+                inputs = inputs.cuda()
 
-        # Actions by the Policy Network
-        probs = torch.sigmoid(agent(inputs))
+            # Actions by the Policy Network
+            probs = torch.sigmoid(agent(inputs))
 
-        # Sample the policy from the agents output
-        policy = probs.data.clone()
-        policy[policy<0.5] = 0.0
-        policy[policy>=0.5] = 1.0
-        policy = Variable(policy)
+            # Sample the policy from the agents output
+            policy = probs.data.clone()
+            policy[policy<0.5] = 0.0
+            policy[policy>=0.5] = 1.0
+            policy = Variable(policy)
 
-        offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
+            offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
 
-        reward = utils.compute_reward(offset_fd, offset_cd, policy.data, args.beta, args.sigma)
-        metrics, set_labels = utils.get_detected_boxes(policy, targets, metrics, set_labels)
+            reward = utils.compute_reward(offset_fd, offset_cd, policy.data, args.beta, args.sigma)
+            metrics, set_labels = utils.get_detected_boxes(policy, targets, metrics, set_labels)
 
-        rewards.append(reward)
-        policies.append(policy.data)
+            rewards.append(reward)
+            policies.append(policy.data)
 
     true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*metrics))]
     precision, recall, AP, f1, ap_class = utils_detector.ap_per_class(true_positives, pred_scores, pred_labels, set_labels)

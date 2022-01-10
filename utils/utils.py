@@ -38,7 +38,7 @@ def get_detected_boxes(policy, file_dirs, metrics, set_labels):
                 outputs_all = []
                 gt_path = '{}/{}_{}_{}.txt'.format(base_dir_groundtruth, file_dir_st, xind, yind)
                 if os.path.exists(gt_path):
-                    gt = np.load(gt_path).reshape([-1, 5])
+                    gt = np.loadtxt(gt_path).reshape([-1, 5])
                     targets = np.hstack((np.zeros((gt.shape[0], 1)), gt))
                     targets[:, 2:] = xywh2xyxy(targets[:, 2:])
                     # ----------------- Read Detections -------------------------------
