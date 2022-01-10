@@ -11,7 +11,7 @@ import os
 import torch
 import torch.utils.data as torchdata
 import torch.nn as nn
-import torch.nn.functional as F
+
 import numpy as np
 import tqdm
 import torch.optim as optim
@@ -23,7 +23,6 @@ from tensorboard_logger import configure, log_value
 from torch.distributions import Bernoulli
 
 from utils import utils, utils_detector
-from constants import base_dir_metric_cd, base_dir_metric_fd
 from constants import num_actions
 
 parser = argparse.ArgumentParser(description='PolicyNetworkTraining')
@@ -56,7 +55,7 @@ def train(epoch):
             inputs = inputs.cuda()
 
         # Actions by the Agent
-        probs = F.sigmoid(agent.forward(inputs))
+        probs = torch.sigmoid(agent.forward(inputs))
         alpha_hp = np.clip(args.alpha + epoch * 0.001, 0.6, 0.95)
         probs = probs*alpha_hp + (1-alpha_hp) * (1-probs)
 
@@ -111,7 +110,7 @@ def test(epoch):
             inputs = inputs.cuda()
 
         # Actions by the Policy Network
-        probs = F.sigmoid(agent(inputs))
+        probs = torch.sigmoid(agent(inputs))
 
         # Sample the policy from the agents output
         policy = probs.data.clone()
@@ -130,7 +129,7 @@ def test(epoch):
     true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*metrics))]
     precision, recall, AP, f1, ap_class = utils_detector.ap_per_class(true_positives, pred_scores, pred_labels, set_labels)
     reward, sparsity, variance, policy_set = utils.performance_stats(policies, rewards)
-    
+
     print('Test - AP: %.3f | AR : %.3f' % (AP[0], recall.mean()))
     print('Test - Rw: %.2E | S: %.3f | V: %.3f | #: %d' % (reward, sparsity, variance, len(policy_set)))
 

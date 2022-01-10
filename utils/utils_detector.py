@@ -94,15 +94,14 @@ def ap_per_class(tp, conf, pred_cls, target_cls):
     return p, r, ap, f1, unique_classes.astype("int32")
 
 def ar_per_class(tp, conf, pred_cls, target_cls):
-    """ Compute the average precision, given the recall and precision curves.
-    Source: https://github.com/rafaelpadilla/Object-Detection-Metrics.
+    """ Compute the average recall, given the recall and precision curves.
     # Arguments
         tp:    True positives (list).
         conf:  Objectness value from 0-1 (list).
         pred_cls: Predicted object classes (list).
         target_cls: True object classes (list).
     # Returns
-        The average precision as computed in py-faster-rcnn.
+        The average recall.
     """
 
     # Sort by objectness
@@ -224,7 +223,7 @@ def bbox_iou(box1, box2, x1y1x2y2=True):
         b1_x1, b1_y1, b1_x2, b1_y2 = box1[:, 0], box1[:, 1], box1[:, 2], box1[:, 3]
         b2_x1, b2_y1, b2_x2, b2_y2 = box2[:, 0], box2[:, 1], box2[:, 2], box2[:, 3]
 
-    # get the corrdinates of the intersection rectangle
+    # get the coordinates of the intersection rectangle
     inter_rect_x1 = torch.max(b1_x1, b2_x1)
     inter_rect_y1 = torch.max(b1_y1, b2_y1)
     inter_rect_x2 = torch.min(b1_x2, b2_x2)
