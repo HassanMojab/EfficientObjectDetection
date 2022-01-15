@@ -45,13 +45,13 @@ def get_detected_boxes(policy, file_dirs, metrics, set_labels):
 
                     # ----------------- Read Detections -------------------------------
                     if policy[index, counter] == 1:
-                        preds_dir = '{}/{}_{}_{}'.format(base_dir_detections_fd, file_dir_st, xind, yind)
+                        preds_dir = '{}/{}_{}_{}.npy'.format(base_dir_detections_fd, file_dir_st, xind, yind)
                         targets[:, 2:] *= img_size_fd
                         if os.path.exists(preds_dir):
                             preds = np.load(preds_dir).reshape([-1,7])
                             outputs_all.append(torch.from_numpy(preds))
                     else:
-                        preds_dir = '{}/{}_{}_{}'.format(base_dir_detections_cd, file_dir_st, xind, yind)
+                        preds_dir = '{}/{}_{}_{}.npy'.format(base_dir_detections_cd, file_dir_st, xind, yind)
                         targets[:, 2:] *= img_size_cd
                         if os.path.exists(preds_dir):
                             preds = np.load(preds_dir).reshape([-1,7])
@@ -61,9 +61,6 @@ def get_detected_boxes(policy, file_dirs, metrics, set_labels):
                 else:
                     continue
                 counter += 1
-
-    if len(metrics) == 0:
-        print(f"file_dirs: {file_dirs}")
 
     return metrics, set_labels
 
