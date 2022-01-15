@@ -59,6 +59,7 @@ def get_detected_boxes(policy, file_dirs, metrics, set_labels):
                     set_labels += targets[:, 1].tolist()
                     metrics += utils_detector.get_batch_statistics(outputs_all, torch.from_numpy(targets), 0.5)
                 else:
+                    print(f"path doesn't exist or is empty: {gt_path}")
                     continue
                 counter += 1
 

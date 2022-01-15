@@ -126,6 +126,8 @@ def test(epoch):
             rewards.append(reward)
             policies.append(policy.data)
 
+    # FIXME: true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*metrics))]
+    # ValueError: not enough values to unpack (expected 3, got 0)
     true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*metrics))]
     precision, recall, AP, f1, ap_class = utils_detector.ap_per_class(true_positives, pred_scores, pred_labels, set_labels)
     reward, sparsity, variance, policy_set = utils.performance_stats(policies, rewards)
