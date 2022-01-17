@@ -9,7 +9,7 @@ import json
 from utils import utils_detector
 from dataset.dataloader import CustomDatasetFromImages
 from constants import base_dir_groundtruth, base_dir_detections_cd, base_dir_detections_fd, base_dir_metric_cd, base_dir_metric_fd
-from constants import num_windows, img_size_fd, img_size_cd
+from constants import num_windows
 
 def save_args(__file__, args):
     shutil.copy(os.path.basename(__file__), args.cv_dir)
@@ -20,14 +20,6 @@ def read_json(filename):
     with open(filename) as dt:
         data = json.load(dt)
     return data
-
-def xywh2xyxy(x):
-    y = np.zeros(x.shape)
-    y[:,0] = x[:, 0] - x[:, 2] / 2.
-    y[:,1] = x[:, 1] - x[:, 3] / 2.
-    y[:,2] = x[:, 0] + x[:, 2] / 2.
-    y[:,3] = x[:, 1] + x[:, 3] / 2.
-    return y
 
 def get_detected_boxes(policy, file_dirs, metrics, set_labels):
     for index, file_dir_st in enumerate(file_dirs):
@@ -41,18 +33,15 @@ def get_detected_boxes(policy, file_dirs, metrics, set_labels):
                     gt = np.loadtxt(gt_path).reshape([-1, 5])
 
                     targets = np.hstack((np.zeros((gt.shape[0], 1)), gt))
-                    targets[:, 2:] = xywh2xyxy(targets[:, 2:])
 
                     # ----------------- Read Detections -------------------------------
                     if policy[index, counter] == 1:
                         preds_dir = '{}/{}_{}_{}.npy'.format(base_dir_detections_fd, file_dir_st, xind, yind)
-                        targets[:, 2:] *= img_size_fd
                         if os.path.exists(preds_dir):
                             preds = np.load(preds_dir).reshape([-1,7])
                             outputs_all.append(torch.from_numpy(preds))
                     else:
                         preds_dir = '{}/{}_{}_{}.npy'.format(base_dir_detections_cd, file_dir_st, xind, yind)
-                        targets[:, 2:] *= img_size_cd
                         if os.path.exists(preds_dir):
                             preds = np.load(preds_dir).reshape([-1,7])
                             outputs_all.append(torch.from_numpy(preds))

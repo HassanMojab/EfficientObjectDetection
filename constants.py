@@ -5,5 +5,3 @@ base_dir_metric_fd = './data/your_dataset/base_dir_metric_fd' # Directory that c
 base_dir_metric_cd = './data/your_dataset/base_dir_metric_cd' # Directory that contains AP or AR values by the coarse detector
 num_actions = 9 # Hyperparameter, should be equal to num_windows * num_windows
 num_windows = 3 # Number of windows in one dimension
-img_size_fd = 320 # Image size used to train the fine level detector
-img_size_cd = 64 # Image size used to train the coarse level detector
