@@ -71,10 +71,11 @@ def train(epoch):
 
         # Get the batch wise metrics
         offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
+        object_counts = utils.read_counts(targets, num_actions)
 
         # Find the reward for baseline and sampled policy
-        reward_map = utils.compute_reward(offset_fd, offset_cd, policy_map.data, args.beta, args.sigma)
-        reward_sample = utils.compute_reward(offset_fd, offset_cd, policy_sample.data, args.beta, args.sigma)
+        reward_map = utils.compute_reward(offset_fd, offset_cd, object_counts, policy_map.data, args.beta, args.sigma)
+        reward_sample = utils.compute_reward(offset_fd, offset_cd, object_counts, policy_sample.data, args.beta, args.sigma)
         advantage = reward_sample.cuda().float() - reward_map.cuda().float()
 
         # Find the loss for only the policy network

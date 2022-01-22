@@ -8,7 +8,7 @@ import json
 
 from utils import utils_detector
 from dataset.dataloader import CustomDatasetFromImages
-from constants import base_dir_groundtruth, base_dir_detections_cd, base_dir_detections_fd, base_dir_metric_cd, base_dir_metric_fd
+from constants import base_dir_groundtruth, base_dir_detections_cd, base_dir_detections_fd, base_dir_metric_cd, base_dir_metric_fd, base_dir_counts
 from constants import num_windows
 
 def save_args(__file__, args):
@@ -62,6 +62,12 @@ def read_offsets(image_ids, num_actions):
 
     return offset_fd, offset_cd
 
+def read_counts(image_ids, num_actions):
+    counts = torch.zeros((len(image_ids), num_actions)).cuda()
+    for index, img_id in enumerate(image_ids):
+        counts[index, :] = torch.from_numpy(np.load(f"{base_dir_counts}/{img_id}.npy").flatten())
+    return counts
+
 def performance_stats(policies, rewards):
     # Print the performace metrics including the average reward, average number
     # and variance of sampled num_patches, and number of unique policies
@@ -77,7 +83,7 @@ def performance_stats(policies, rewards):
 
     return reward, num_unique_policy, variance, policy_set
 
-def compute_reward(offset_fd, offset_cd, policy, beta, sigma):
+def compute_reward(offset_fd, offset_cd, object_counts, policy, beta, sigma):
     """
     Args:
         offset_fd: np.array, shape [batch_size, num_actions]
@@ -89,7 +95,7 @@ def compute_reward(offset_fd, offset_cd, policy, beta, sigma):
     # Reward function favors policies that drops patches only if the classifier
     # successfully categorizes the image
     offset_cd += beta
-    reward_patch_diff = (offset_fd - offset_cd)*policy + -1*((offset_fd - offset_cd)*(1-policy))
+    reward_patch_diff = ((offset_fd - offset_cd)*policy + -1*((offset_fd - offset_cd)*(1-policy))) * object_counts
     reward_patch_acqcost = (policy.size(1) - policy.sum(dim=1)) / policy.size(1)
     reward_img = reward_patch_diff.sum(dim=1) + sigma * reward_patch_acqcost
     reward = reward_img.unsqueeze(1)
