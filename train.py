@@ -120,8 +120,9 @@ def test(epoch):
             policy = Variable(policy)
 
             offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
+            object_counts = utils.read_counts(targets, num_actions)
 
-            reward = utils.compute_reward(offset_fd, offset_cd, policy.data, args.beta, args.sigma)
+            reward = utils.compute_reward(offset_fd, offset_cd, object_counts, policy.data, args.beta, args.sigma)
             metrics, set_labels = utils.get_detected_boxes(policy, targets, metrics, set_labels)
 
             rewards.append(reward)
