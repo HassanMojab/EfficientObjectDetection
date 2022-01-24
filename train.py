@@ -51,6 +51,9 @@ def train(epoch):
     for (inputs, _, offset_fd, offset_cd, object_counts) in tqdm.tqdm(trainloader, total=len(trainloader)):
         if not args.parallel:
             inputs = inputs.cuda()
+            offset_fd = offset_fd.cuda()
+            offset_cd = offset_cd.cuda()
+            object_counts = object_counts.cuda()
 
         # Actions by the Agent
         probs = torch.sigmoid(agent.forward(inputs))
@@ -102,6 +105,9 @@ def test(epoch):
         for (inputs, targets, offset_fd, offset_cd, object_counts) in tqdm.tqdm(testloader, total=len(testloader)):
             if not args.parallel:
                 inputs = inputs.cuda()
+                offset_fd = offset_fd.cuda()
+                offset_cd = offset_cd.cuda()
+                object_counts = object_counts.cuda()
 
             # Actions by the Policy Network
             probs = torch.sigmoid(agent(inputs))

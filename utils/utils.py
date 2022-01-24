@@ -54,8 +54,8 @@ def get_detected_boxes(policy, file_dirs, metrics, set_labels):
     return metrics, set_labels
 
 def read_offsets(image_ids, num_actions):
-    offset_fd = torch.zeros((len(image_ids), num_actions)).cuda()
-    offset_cd = torch.zeros((len(image_ids), num_actions)).cuda()
+    offset_fd = torch.zeros((len(image_ids), num_actions))
+    offset_cd = torch.zeros((len(image_ids), num_actions))
     for index, img_id in enumerate(image_ids):
         offset_fd[index, :] = torch.from_numpy(np.load(f"{base_dir_metric_fd}/{img_id}.npy").flatten())
         offset_cd[index, :] = torch.from_numpy(np.load(f"{base_dir_metric_cd}/{img_id}.npy").flatten())
@@ -63,7 +63,7 @@ def read_offsets(image_ids, num_actions):
     return offset_fd, offset_cd
 
 def read_counts(image_ids, num_actions):
-    counts = torch.zeros((len(image_ids), num_actions)).cuda()
+    counts = torch.zeros((len(image_ids), num_actions))
     for index, img_id in enumerate(image_ids):
         counts[index, :] = torch.from_numpy(np.load(f"{base_dir_counts}/{img_id}.npy").flatten())
     return counts
