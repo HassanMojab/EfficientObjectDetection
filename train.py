@@ -18,7 +18,6 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 cudnn.benchmark = True
 import argparse
-from torch.autograd import Variable
 from tensorboard_logger import configure, log_value
 from torch.distributions import Bernoulli
 
@@ -50,7 +49,6 @@ def train(epoch):
     agent.train()
     rewards, rewards_baseline, policies = [], [], []
     for batch_idx, (inputs, targets) in tqdm.tqdm(enumerate(trainloader), total=len(trainloader)):
-        inputs = Variable(inputs)
         if not args.parallel:
             inputs = inputs.cuda()
 
@@ -67,7 +65,6 @@ def train(epoch):
         policy_map = probs.data.clone()
         policy_map[policy_map<0.5] = 0.0
         policy_map[policy_map>=0.5] = 1.0
-        policy_map = Variable(policy_map)
 
         # Get the batch wise metrics
         offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
@@ -80,7 +77,7 @@ def train(epoch):
 
         # Find the loss for only the policy network
         loss = -distr.log_prob(policy_sample)
-        loss = loss * Variable(advantage).expand_as(policy_sample)
+        loss = loss * advantage.expand_as(policy_sample)
         loss = loss.mean()
 
         optimizer.zero_grad()
@@ -117,7 +114,6 @@ def test(epoch):
             policy = probs.data.clone()
             policy[policy<0.5] = 0.0
             policy[policy>=0.5] = 1.0
-            policy = Variable(policy)
 
             offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
             object_counts = utils.read_counts(targets, num_actions)
