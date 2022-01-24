@@ -5,8 +5,12 @@ import warnings
 from torch.utils.data.dataset import Dataset
 from PIL import Image
 
+from utils import utils
+from constants import num_actions
+
 Image.MAX_IMAGE_PIXELS = None
-warnings.simplefilter('ignore', Image.DecompressionBombWarning)
+warnings.simplefilter("ignore", Image.DecompressionBombWarning)
+
 
 class CustomDatasetFromImages(Dataset):
     def __init__(self, csv_path, transform):
@@ -27,6 +31,10 @@ class CustomDatasetFromImages(Dataset):
         # Calculate len
         self.data_len = len(data_info)
 
+        # Preload metrics
+        self.offset_fd, self.offset_cd = utils.read_offsets(self.label_arr, num_actions)
+        self.object_counts = utils.read_counts(self.label_arr, num_actions)
+
     def __getitem__(self, index):
         # Get image name from the pandas df
         single_image_name = self.image_arr[index]
@@ -37,7 +45,11 @@ class CustomDatasetFromImages(Dataset):
         # Get label(class) of the image based on the cropped pandas column
         single_image_label = self.label_arr[index]
 
-        return (img_as_tensor, single_image_label)
+        offset_fd = self.offset_fd[index]
+        offset_cd = self.offset_cd[index]
+        object_counts = self.object_counts[index]
+
+        return (img_as_tensor, single_image_label, offset_fd, offset_cd, object_counts)
 
     def __len__(self):
         return self.data_len

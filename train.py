@@ -48,7 +48,7 @@ utils.save_args(__file__, args)
 def train(epoch):
     agent.train()
     rewards, rewards_baseline, policies = [], [], []
-    for batch_idx, (inputs, targets) in tqdm.tqdm(enumerate(trainloader), total=len(trainloader)):
+    for (inputs, _, offset_fd, offset_cd, object_counts) in tqdm.tqdm(trainloader, total=len(trainloader)):
         if not args.parallel:
             inputs = inputs.cuda()
 
@@ -65,10 +65,6 @@ def train(epoch):
         policy_map = probs.data.clone()
         policy_map[policy_map<0.5] = 0.0
         policy_map[policy_map>=0.5] = 1.0
-
-        # Get the batch wise metrics
-        offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
-        object_counts = utils.read_counts(targets, num_actions)
 
         # Find the reward for baseline and sampled policy
         reward_map = utils.compute_reward(offset_fd, offset_cd, object_counts, policy_map.data, args.beta, args.sigma)
@@ -103,7 +99,7 @@ def test(epoch):
     rewards, metrics, policies, set_labels = [], [], [], []
 
     with torch.no_grad():
-        for batch_idx, (inputs, targets) in tqdm.tqdm(enumerate(testloader), total=len(testloader)):
+        for (inputs, targets, offset_fd, offset_cd, object_counts) in tqdm.tqdm(testloader, total=len(testloader)):
             if not args.parallel:
                 inputs = inputs.cuda()
 
@@ -114,9 +110,6 @@ def test(epoch):
             policy = probs.data.clone()
             policy[policy<0.5] = 0.0
             policy[policy>=0.5] = 1.0
-
-            offset_fd, offset_cd = utils.read_offsets(targets, num_actions)
-            object_counts = utils.read_counts(targets, num_actions)
 
             reward = utils.compute_reward(offset_fd, offset_cd, object_counts, policy.data, args.beta, args.sigma)
             metrics, set_labels = utils.get_detected_boxes(policy, targets, metrics, set_labels)
