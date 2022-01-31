@@ -74,7 +74,7 @@ def test():
         ):
             inputs_cpn = inputs_cpn.to(device)
 
-            policy_cpn = torch.ones((1, args.num_windows_cpn ** 2))
+            policy_cpn = torch.ones((1, args.num_windows_cpn ** 2), device=device)
 
             if args.load_cpn:
                 # Get the low resolution agent images
@@ -91,7 +91,7 @@ def test():
                     # Get the low resolution agent image
                     # -----------------------------------------------
                     policy_fpn = torch.zeros(
-                        (policy_cpn.shape[0], args.num_windows_fpn ** 2)
+                        (policy_cpn.shape[0], args.num_windows_fpn ** 2), device=device
                     )
                     index_ft = xind * args.num_windows_cpn + yind
                     selected_indices = policy_cpn[:, index_ft] != 0
@@ -99,7 +99,7 @@ def test():
                     if selected_indices.any():
                         start = time.time()
                         policy_fpn[selected_indices] = torch.ones(
-                            (selected_indices.sum(), args.num_windows_fpn ** 2)
+                            (selected_indices.sum(), args.num_windows_fpn ** 2), device=device
                         )
 
                         if args.load_fpn:
