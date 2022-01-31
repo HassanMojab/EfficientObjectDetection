@@ -71,6 +71,8 @@ def test():
         for (inputs_cpn, targets, _, _, _) in tqdm.tqdm(
             testloader, total=len(testloader)
         ):
+            num_total += inputs_cpn.shape[0]
+
             start = time.time()
 
             inputs_cpn = inputs_cpn.to(device)
@@ -125,7 +127,6 @@ def test():
                         total_time += time.time() - start
 
                     num_sampled += (policy_fpn == 1).sum().cpu().numpy()
-                    num_total += policy_fpn.shape[0]
 
                     # Compute the Batch-wise metrics
                     targets_ind = [
