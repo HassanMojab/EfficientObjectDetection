@@ -95,6 +95,7 @@ def test():
                     )
                     index_ft = xind * args.num_windows_cpn + yind
                     selected_indices = policy_cpn[:, index_ft] != 0
+                    print(selected_indices)
 
                     if selected_indices.any():
                         start = time.time()
