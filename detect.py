@@ -85,70 +85,53 @@ def detect():
 
     total_time = 0
 
+    policy_cpn = torch.ones((1, args.num_windows_cpn ** 2))
+
+    start = time.time()
+
+    # Open image
+    img_cpn = Image.open(args.img_path)
+    # Transform the image
+    _, transform_cpn = utils.get_transforms(args.img_size_cpn)
+    inputs_cpn = transform_cpn(img_cpn)
+    inputs_cpn = torch.unsqueeze(inputs_cpn, 0)
+
+    inputs_cpn.to(device)
+
     if args.load_cpn:
-        start = time.time()
-
-        # Open image
-        img_cpn = Image.open(args.img_path)
-        # Transform the image
-        _, transform_cpn = utils.get_transforms(args.img_size_cpn)
-        inputs_cpn = transform_cpn(img_cpn)
-        inputs_cpn = torch.unsqueeze(inputs_cpn, 0)
-
-        inputs_cpn.to(device)
-
         policy_cpn = detect_cpn(inputs_cpn)
 
-        total_time += time.time() - start
+    total_time += time.time() - start
 
-        # print(f"CPN: {policy_cpn}")
+    policy_fpn_list = []
 
-        policy_fpn_list = []
+    # Select the images to run Fine Detector on
+    for xind in range(args.num_windows_cpn):
+        for yind in range(args.num_windows_cpn):
+            # Get the low resolution agent image
+            # -----------------------------------------------
+            policy_fpn = torch.zeros((args.num_windows_fpn ** 2))
+            index_ft = xind * args.num_windows_cpn + yind
+            if policy_cpn[:, index_ft] != 0:
+                start = time.time()
+                policy_fpn = torch.ones((args.num_windows_fpn ** 2))
 
-        if args.load_fpn:
-            # Select the images to run Fine Detector on
-            for xind in range(args.num_windows_cpn):
-                for yind in range(args.num_windows_cpn):
+                if args.load_fpn:
+                    inputs_fpn = inputs_cpn[
+                        :,
+                        :,
+                        xind * args.img_size_fpn : xind * args.img_size_fpn
+                        + args.img_size_fpn,
+                        yind * args.img_size_fpn : yind * args.img_size_fpn
+                        + args.img_size_fpn,
+                    ]
+                    policy_fpn = detect_fpn(inputs_fpn)
 
-                    # Get the low resolution agent image
-                    # -----------------------------------------------
-                    policy_fpn = torch.zeros((args.num_windows_fpn ** 2))
-                    index_ft = xind * args.num_windows_cpn + yind
-                    if policy_cpn[:, index_ft] != 0:
-                        start = time.time()
+                total_time += time.time() - start
 
-                        inputs_fpn = inputs_cpn[
-                            :,
-                            :,
-                            xind * args.img_size_fpn : xind * args.img_size_fpn
-                            + args.img_size_fpn,
-                            yind * args.img_size_fpn : yind * args.img_size_fpn
-                            + args.img_size_fpn,
-                        ]
-                        policy_fpn = detect_fpn(inputs_fpn)
+            policy_fpn_list.append(policy_fpn.numpy())
 
-                        total_time += time.time() - start
-
-                    policy_fpn_list.append(policy_fpn.numpy())
-
-        visualize_actions(policy_cpn.numpy(), policy_fpn_list)
-
-    elif args.load_fpn:
-        start = time.time()
-
-        # Open image
-        img_fpn = Image.open(args.img_path)
-        # Transform the image
-        _, transform_fpn = utils.get_transforms(args.img_size_fpn)
-        inputs_fpn = transform_fpn(img_fpn)
-
-        inputs_fpn = inputs_fpn.to(device)
-
-        policy_fpn = detect_fpn(inputs_fpn)
-
-        total_time += time.time() - start
-
-        print(f"FPN: {policy_fpn}")
+    visualize_actions(policy_cpn.numpy(), policy_fpn_list)
 
     print(f"Run Time: {total_time:.3f}s")
 
@@ -195,7 +178,7 @@ def visualize_actions(policy_cpn, policy_fpn_list):
     for row in matrix:
         print_row(row, count)
 
-    print(f"HR: {fpn_matrix.sum() / num_windows ** 2 * 100:.3f}%")
+    print(f"HR: {fpn_matrix.sum() / num_windows ** 2 * 100:.2f}%")
 
 
 # --------------------------------------------------------------------------------------------------------#
