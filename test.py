@@ -137,7 +137,7 @@ def test():
                         targets_ind,
                         metrics,
                         set_labels,
-                        num_windows=args.num_windows_fpn,
+                        num_wind=args.num_windows_fpn,
                     )
 
     # Compute the Precision and Recall Performance of the Agent and Detectors
