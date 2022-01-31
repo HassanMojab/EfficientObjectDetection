@@ -4,8 +4,8 @@ output-explained as pretraining the policy network in the paper.
 How to Run on the xView Dataset:
     python test.py \
         --data_dir data/your_dataset \
-        --load_fpn model/fd_fpn \
-        --load_cpn model/fd_cpn
+        --load_fpn model/fpn \
+        --load_cpn model/cpn
 """
 import torch
 import torch.utils.data as torchdata
@@ -69,7 +69,7 @@ def test():
     total_time = 0
 
     with torch.no_grad():
-        for (inputs_cpn, targets) in tqdm.tqdm(testloader, total=len(testloader)):
+        for (inputs_cpn, targets, _, _, _) in tqdm.tqdm(testloader, total=len(testloader)):
             inputs_cpn = inputs_cpn.to(device)
 
             policy_cpn = torch.ones((1, args.num_windows_cpn ** 2))
