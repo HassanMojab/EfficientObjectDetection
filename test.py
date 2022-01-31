@@ -65,15 +65,15 @@ def test():
 
     metrics, set_labels, num_total, num_sampled = [], [], 0.0, 0.0
 
-    start = time.time()
     total_time = 0
 
     with torch.no_grad():
         for (inputs_cpn, targets, _, _, _) in tqdm.tqdm(
             testloader, total=len(testloader)
         ):
-            inputs_cpn = inputs_cpn.to(device)
+            start = time.time()
 
+            inputs_cpn = inputs_cpn.to(device)
             policy_cpn = torch.ones((1, args.num_windows_cpn ** 2), device=device)
 
             if args.load_cpn:
@@ -84,6 +84,8 @@ def test():
                 policy_cpn = probs.data.clone()
                 policy_cpn[policy_cpn < 0.5] = 0.0
                 policy_cpn[policy_cpn >= 0.5] = 1.0
+
+            total_time += time.time() - start
 
             # Select the images to run Fine Detector on
             for xind in range(args.num_windows_cpn):
@@ -99,7 +101,8 @@ def test():
                     if selected_indices.any():
                         start = time.time()
                         policy_fpn[selected_indices] = torch.ones(
-                            (selected_indices.sum(), args.num_windows_fpn ** 2), device=device
+                            (selected_indices.sum(), args.num_windows_fpn ** 2),
+                            device=device,
                         )
 
                         if args.load_fpn:
@@ -133,7 +136,6 @@ def test():
                         policy_fpn, targets_ind, metrics, set_labels,
                     )
 
-    print(time.time() - start)
     # Compute the Precision and Recall Performance of the Agent and Detectors
     true_positives, pred_scores, pred_labels = [
         np.concatenate(x, 0) for x in list(zip(*metrics))
@@ -143,8 +145,7 @@ def test():
     )
 
     print(
-        "Test - AP: %.3f | AR : %.3f | RS : %.3f"
-        % (AP[0], recall.mean(), num_sampled / num_total,)
+        f"Test - AP: {AP[0]:.3f} | AR: {recall.mean():.3f} | RS: {num_sampled / num_total:.3f}% | Run-time: {total_time}"
     )
 
 
