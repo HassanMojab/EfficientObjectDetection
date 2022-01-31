@@ -55,7 +55,7 @@ Finally, we should enter the directories of the folders created in this section 
 ```
 ├── ./data/your_dataset/
    ├── train.csv
-   ├── valid.csv
+   ├── val.csv
    ├── base_dir_detections_fd
              image1_0_0.npy
              image1_0_1.npy
