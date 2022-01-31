@@ -69,7 +69,9 @@ def test():
     total_time = 0
 
     with torch.no_grad():
-        for (inputs_cpn, targets, _, _, _) in tqdm.tqdm(testloader, total=len(testloader)):
+        for (inputs_cpn, targets, _, _, _) in tqdm.tqdm(
+            testloader, total=len(testloader)
+        ):
             inputs_cpn = inputs_cpn.to(device)
 
             policy_cpn = torch.ones((1, args.num_windows_cpn ** 2))
@@ -90,6 +92,7 @@ def test():
                     # -----------------------------------------------
                     policy_fpn = torch.zeros((args.num_windows_fpn ** 2))
                     index_ft = xind * args.num_windows_cpn + yind
+                    print(policy_cpn[:, index_ft])
                     if policy_cpn[:, index_ft] != 0:
                         start = time.time()
                         policy_fpn = torch.ones((args.num_windows_fpn ** 2))
