@@ -55,16 +55,15 @@ device = torch.device(cuda_or_cpu)
 
 
 def detect_cpn(inputs_cpn):
-    with torch.no_grad():
-        # Get the low resolution agent images
-        probs = torch.sigmoid(agent_cpn(inputs_cpn))
+    # Get the low resolution agent images
+    probs = torch.sigmoid(agent_cpn(inputs_cpn))
 
-        # Sample the policy from the agents output
-        policy_cpn = probs.data.clone()
-        policy_cpn[policy_cpn < 0.5] = 0.0
-        policy_cpn[policy_cpn >= 0.5] = 1.0
+    # Sample the policy from the agents output
+    policy_cpn = probs.data.clone()
+    policy_cpn[policy_cpn < 0.5] = 0.0
+    policy_cpn[policy_cpn >= 0.5] = 1.0
 
-        return policy_cpn
+    return policy_cpn
 
 
 def detect_fpn(inputs_fpn):
@@ -89,49 +88,50 @@ def detect():
 
     start = time.time()
 
-    # Open image
-    img_cpn = Image.open(args.img_path)
-    # Transform the image
-    _, transform_cpn = utils.get_transforms(args.img_size_cpn)
-    inputs_cpn = transform_cpn(img_cpn)
-    inputs_cpn = torch.unsqueeze(inputs_cpn, 0)
+    with torch.no_grad():
+        # Open image
+        img_cpn = Image.open(args.img_path)
+        # Transform the image
+        _, transform_cpn = utils.get_transforms(args.img_size_cpn)
+        inputs_cpn = transform_cpn(img_cpn)
+        inputs_cpn = torch.unsqueeze(inputs_cpn, 0)
 
-    inputs_cpn.to(device)
+        inputs_cpn.to(device)
 
-    if args.load_cpn:
-        policy_cpn = detect_cpn(inputs_cpn)
+        if args.load_cpn:
+            policy_cpn = detect_cpn(inputs_cpn)
 
-    total_time += time.time() - start
+        total_time += time.time() - start
 
-    policy_fpn_list = []
+        policy_fpn_list = []
 
-    # Select the images to run Fine Detector on
-    for xind in range(args.num_windows_cpn):
-        for yind in range(args.num_windows_cpn):
-            # Get the low resolution agent image
-            # -----------------------------------------------
-            policy_fpn = torch.zeros((args.num_windows_fpn ** 2))
-            index_ft = xind * args.num_windows_cpn + yind
-            if policy_cpn[:, index_ft] != 0:
-                start = time.time()
-                policy_fpn = torch.ones((args.num_windows_fpn ** 2))
+        # Select the images to run Fine Detector on
+        for xind in range(args.num_windows_cpn):
+            for yind in range(args.num_windows_cpn):
+                # Get the low resolution agent image
+                # -----------------------------------------------
+                policy_fpn = torch.zeros((args.num_windows_fpn ** 2))
+                index_ft = xind * args.num_windows_cpn + yind
+                if policy_cpn[:, index_ft] != 0:
+                    start = time.time()
+                    policy_fpn = torch.ones((args.num_windows_fpn ** 2))
 
-                if args.load_fpn:
-                    inputs_fpn = inputs_cpn[
-                        :,
-                        :,
-                        xind * args.img_size_fpn : xind * args.img_size_fpn
-                        + args.img_size_fpn,
-                        yind * args.img_size_fpn : yind * args.img_size_fpn
-                        + args.img_size_fpn,
-                    ]
-                    policy_fpn = detect_fpn(inputs_fpn)
+                    if args.load_fpn:
+                        inputs_fpn = inputs_cpn[
+                            :,
+                            :,
+                            xind * args.img_size_fpn : xind * args.img_size_fpn
+                            + args.img_size_fpn,
+                            yind * args.img_size_fpn : yind * args.img_size_fpn
+                            + args.img_size_fpn,
+                        ]
+                        policy_fpn = detect_fpn(inputs_fpn)
 
-                total_time += time.time() - start
+                    total_time += time.time() - start
 
-            policy_fpn_list.append(policy_fpn.numpy())
+                policy_fpn_list.append(policy_fpn.numpy())
 
-    visualize_actions(policy_cpn.numpy(), policy_fpn_list)
+        visualize_actions(policy_cpn.numpy(), policy_fpn_list)
 
     print(f"Run Time: {total_time:.3f}s")
 
