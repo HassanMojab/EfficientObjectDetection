@@ -145,7 +145,7 @@ def test():
     )
 
     print(
-        f"Test - AP: {AP[0]:.3f} | AR: {recall.mean():.3f} | RS: {num_sampled / num_total:.3f}% | Run-time: {total_time}"
+        f"Test - AP: {AP[0]:.3f} | AR: {recall.mean():.3f} | RS: {num_sampled / num_total:.3f}% | Run-time: {total_time:.3f}s"
     )
 
 
