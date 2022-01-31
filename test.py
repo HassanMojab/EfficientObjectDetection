@@ -63,7 +63,7 @@ def test():
     if args.load_fpn:
         agent_fpn.eval()
 
-    metrics, set_labels, num_total, num_sampled = [], [], 0.0, 0.0
+    metrics, set_labels, num_sampled = [], [], 0.0
 
     total_time = 0
 
@@ -125,7 +125,6 @@ def test():
                         total_time += time.time() - start
 
                     num_sampled += (policy_fpn == 1).sum().cpu().numpy().tolist()
-                    num_total += policy_fpn.size(1)
 
                     # Compute the Batch-wise metrics
                     targets_ind = [
@@ -151,7 +150,7 @@ def test():
     )
 
     print(
-        f"Test - AP: {AP[0]:.3f} | AR: {recall.mean():.3f} | RS: {num_sampled / num_total:.3f}% | Run-time: {total_time:.3f}s"
+        f"Test - AP: {AP[0]:.3f} | AR: {recall.mean():.3f} | HR: {num_sampled / len(testloader) * 100:.2f}% | Run-time: {total_time:.3f}s"
     )
 
 
