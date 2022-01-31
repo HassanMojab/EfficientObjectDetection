@@ -133,7 +133,11 @@ def test():
                     ]
 
                     metrics, set_labels = utils.get_detected_boxes(
-                        policy_fpn, targets_ind, metrics, set_labels,
+                        policy_fpn,
+                        targets_ind,
+                        metrics,
+                        set_labels,
+                        num_windows=args.num_windows_fpn,
                     )
 
     # Compute the Precision and Recall Performance of the Agent and Detectors
