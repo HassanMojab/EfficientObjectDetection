@@ -91,11 +91,10 @@ def test():
                     # Get the low resolution agent image
                     # -----------------------------------------------
                     policy_fpn = torch.zeros(
-                        (args.batch_size, args.num_windows_fpn ** 2)
+                        (policy_cpn.shape[0], args.num_windows_fpn ** 2)
                     )
                     index_ft = xind * args.num_windows_cpn + yind
                     selected_indices = policy_cpn[:, index_ft] != 0
-                    print(selected_indices)
 
                     if selected_indices.any():
                         start = time.time()
