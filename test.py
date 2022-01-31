@@ -124,7 +124,7 @@ def test():
 
                         total_time += time.time() - start
 
-                    num_sampled += (policy_fpn == 1).sum().cpu().numpy().tolist()
+                    num_sampled += (policy_fpn == 1).sum().cpu().numpy()
 
                     # Compute the Batch-wise metrics
                     targets_ind = [
@@ -149,8 +149,10 @@ def test():
         true_positives, pred_scores, pred_labels, set_labels
     )
 
+    num_windows = args.num_windows_cpn * args.num_windows_fpn
+    HR = num_sampled / (len(testloader) * (num_windows ** 2))
     print(
-        f"Test - AP: {AP[0]:.3f} | AR: {recall.mean():.3f} | HR: {num_sampled / len(testloader) * 100:.2f}% | Run-time: {total_time:.3f}s"
+        f"Test - AP: {AP[0]:.3f} | AR: {recall.mean():.3f} | HR: {HR * 100:.2f}% | Run-time: {total_time:.3f}s"
     )
 
 
