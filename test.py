@@ -90,16 +90,21 @@ def test():
                 for yind in range(args.num_windows_cpn):
                     # Get the low resolution agent image
                     # -----------------------------------------------
-                    policy_fpn = torch.zeros((args.num_windows_fpn ** 2))
+                    policy_fpn = torch.zeros(
+                        (args.batch_size, args.num_windows_fpn ** 2)
+                    )
                     index_ft = xind * args.num_windows_cpn + yind
-                    print(policy_cpn[:, index_ft])
-                    if policy_cpn[:, index_ft] != 0:
+                    selected_indices = policy_cpn[:, index_ft] != 0
+
+                    if selected_indices.any():
                         start = time.time()
-                        policy_fpn = torch.ones((args.num_windows_fpn ** 2))
+                        policy_fpn[selected_indices] = torch.ones(
+                            (selected_indices.sum(), args.num_windows_fpn ** 2)
+                        )
 
                         if args.load_fpn:
                             inputs_fpn = inputs_cpn[
-                                :,
+                                selected_indices,
                                 :,
                                 xind * args.img_size_fpn : xind * args.img_size_fpn
                                 + args.img_size_fpn,
@@ -108,7 +113,7 @@ def test():
                             ]
                             probs = torch.sigmoid(agent_fpn(inputs_fpn))
                             # Sample the policy from the agents output
-                            policy_fpn = probs.data.clone()
+                            policy_fpn[selected_indices] = probs.data.clone()
                             policy_fpn[policy_fpn < 0.5] = 0.0
                             policy_fpn[policy_fpn >= 0.5] = 1.0
 
@@ -151,7 +156,6 @@ testloader = torchdata.DataLoader(
 
 # ---- Load the pre-trained model ----------------------
 if args.load_cpn:
-    print(args.load_cpn)
     agent_cpn = utils.get_model(args.num_windows_cpn ** 2)
     checkpoint_cpn = torch.load(args.load_cpn, map_location=cuda_or_cpu)
     agent_cpn.load_state_dict(checkpoint_cpn["agent"])

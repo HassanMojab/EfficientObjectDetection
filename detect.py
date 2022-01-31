@@ -183,7 +183,6 @@ def visualize_actions(policy_cpn, policy_fpn_list):
 
 # --------------------------------------------------------------------------------------------------------#
 if args.load_cpn:
-    print(args.load_cpn)
     agent_cpn = utils.get_model(args.num_windows_cpn ** 2)
     checkpoint_cpn = torch.load(args.load_cpn, map_location=cuda_or_cpu)
     agent_cpn.load_state_dict(checkpoint_cpn["agent"])
