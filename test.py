@@ -3,7 +3,7 @@ This function pretrains the policy network using the high resolution classifier
 output-explained as pretraining the policy network in the paper.
 How to Run on the xView Dataset:
     python test.py \
-        --data_dir data/your_dataset \
+        --data_dir data/your_dataset/ \
         --load_fpn model/fpn \
         --load_cpn model/cpn
 """
@@ -74,7 +74,9 @@ def test():
             start = time.time()
 
             inputs_cpn = inputs_cpn.to(device)
-            policy_cpn = torch.ones((1, args.num_windows_cpn ** 2), device=device)
+            policy_cpn = torch.ones(
+                (inputs_cpn.shape[0], args.num_windows_cpn ** 2), device=device
+            )
 
             if args.load_cpn:
                 # Get the low resolution agent images
