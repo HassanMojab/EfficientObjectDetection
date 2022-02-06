@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser(description="Test Cascaded Policy Networks")
 parser.add_argument("--data_dir", default="data/", help="data directory")
 parser.add_argument("--img_size_cpn", type=int, default=448, help="CPN Image Size")
 parser.add_argument("--img_size_fpn", type=int, default=112, help="FPN Image Size")
+parser.add_argument("--random", action="store_true", help="use random policy")
 parser.add_argument(
     "--load_cpn", default=None, help="checkpoint to load CPNet agent from"
 )
@@ -89,6 +90,11 @@ def test():
                 policy_cpn[policy_cpn < 0.5] = 0.0
                 policy_cpn[policy_cpn >= 0.5] = 1.0
 
+            if args.random:
+                policy_cpn = torch.rand(
+                    (inputs_cpn.shape[0], args.num_windows_cpn ** 2), device=device
+                )
+
             total_time += time.time() - start
 
             # Select the images to run Fine Detector on
@@ -123,6 +129,12 @@ def test():
                             policy_fpn[selected_indices] = probs.data.clone()
                             policy_fpn[policy_fpn < 0.5] = 0.0
                             policy_fpn[policy_fpn >= 0.5] = 1.0
+
+                        if args.random:
+                            policy_fpn = torch.rand(
+                                (selected_indices.sum(), args.num_windows_fpn ** 2),
+                                device=device,
+                            )
 
                         total_time += time.time() - start
 
