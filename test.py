@@ -91,8 +91,10 @@ def test():
                 policy_cpn[policy_cpn >= 0.5] = 1.0
 
             if args.random:
-                policy_cpn = torch.rand(
-                    (inputs_cpn.shape[0], args.num_windows_cpn ** 2), device=device
+                policy_cpn = torch.round(
+                    torch.rand(
+                        (inputs_cpn.shape[0], args.num_windows_cpn ** 2), device=device
+                    )
                 )
 
             total_time += time.time() - start
@@ -131,9 +133,11 @@ def test():
                             policy_fpn[policy_fpn >= 0.5] = 1.0
 
                         if args.random:
-                            policy_fpn = torch.rand(
-                                (selected_indices.sum(), args.num_windows_fpn ** 2),
-                                device=device,
+                            policy_fpn = torch.round(
+                                torch.rand(
+                                    (selected_indices.sum(), args.num_windows_fpn ** 2),
+                                    device=device,
+                                )
                             )
 
                         total_time += time.time() - start
