@@ -186,7 +186,7 @@ def test():
 
 
 # --------------------------------------------------------------------------------------------------------#
-_, testset = utils.get_dataset(args.img_size_cpn, args.data_dir)
+_, testset = utils.get_dataset(args.img_size_cpn, args.data_dir, num_act=args.num_windows_cpn ** 2)
 testloader = torchdata.DataLoader(
     testset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
 )

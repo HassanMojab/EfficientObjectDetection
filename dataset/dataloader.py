@@ -13,7 +13,7 @@ warnings.simplefilter("ignore", Image.DecompressionBombWarning)
 
 
 class CustomDatasetFromImages(Dataset):
-    def __init__(self, csv_path, transform):
+    def __init__(self, csv_path, transform, num_act=num_actions):
         """
         Args:
             csv_path (string): path to csv file
@@ -32,8 +32,8 @@ class CustomDatasetFromImages(Dataset):
         self.data_len = len(data_info)
 
         # Preload metrics
-        self.offset_fd, self.offset_cd = utils.read_offsets(self.label_arr, num_actions)
-        self.object_counts = utils.read_counts(self.label_arr, num_actions)
+        self.offset_fd, self.offset_cd = utils.read_offsets(self.label_arr, num_act)
+        self.object_counts = utils.read_counts(self.label_arr, num_act)
 
     def __getitem__(self, index):
         # Get image name from the pandas df

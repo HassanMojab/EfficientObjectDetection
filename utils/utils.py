@@ -15,6 +15,7 @@ from constants import (
     base_dir_metric_fd,
     base_dir_counts,
     num_windows,
+    num_actions
 )
 
 
@@ -148,10 +149,10 @@ def get_transforms(img_size):
     return transform_train, transform_test
 
 
-def get_dataset(img_size, root="data/"):
+def get_dataset(img_size, root="data/", num_act=num_actions):
     transform_train, transform_test = get_transforms(img_size)
-    trainset = CustomDatasetFromImages(root + "train.csv", transform_train)
-    testset = CustomDatasetFromImages(root + "val.csv", transform_test)
+    trainset = CustomDatasetFromImages(root + "train.csv", transform_train, num_act=num_act)
+    testset = CustomDatasetFromImages(root + "val.csv", transform_test, num_act=num_act)
 
     return trainset, testset
 
