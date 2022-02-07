@@ -15,7 +15,7 @@ from constants import (
     base_dir_metric_fd,
     base_dir_counts,
     num_windows,
-    num_actions
+    num_actions,
 )
 
 
@@ -126,6 +126,17 @@ def compute_reward(offset_fd, offset_cd, object_counts, policy, beta, sigma):
     return reward.float()
 
 
+class SquarePad:
+    def __call__(self, image):
+        max_wh = max(image.size)
+        p_left, p_top = [(max_wh - s) // 2 for s in image.size]
+        p_right, p_bottom = [
+            max_wh - (s + pad) for s, pad in zip(image.size, [p_left, p_top])
+        ]
+        padding = (p_left, p_top, p_right, p_bottom)
+        return transforms.functional.pad(image, padding, 0, "constant")
+
+
 def get_transforms(img_size):
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
@@ -139,8 +150,9 @@ def get_transforms(img_size):
     )
     transform_test = transforms.Compose(
         [
+            SquarePad(),
             transforms.Resize(img_size),
-            transforms.CenterCrop(img_size),
+            # transforms.CenterCrop(img_size),
             transforms.ToTensor(),
             transforms.Normalize(mean, std),
         ]
@@ -151,7 +163,9 @@ def get_transforms(img_size):
 
 def get_dataset(img_size, root="data/", num_act=num_actions):
     transform_train, transform_test = get_transforms(img_size)
-    trainset = CustomDatasetFromImages(root + "train.csv", transform_train, num_act=num_act)
+    trainset = CustomDatasetFromImages(
+        root + "train.csv", transform_train, num_act=num_act
+    )
     testset = CustomDatasetFromImages(root + "val.csv", transform_test, num_act=num_act)
 
     return trainset, testset
