@@ -95,10 +95,9 @@ def test():
             if args.random:
                 policy_cpn = (
                     torch.rand(
-                        (inputs_cpn.shape[0], args.num_windows_cpn ** 2),
-                        device=device,
+                        (inputs_cpn.shape[0], args.num_windows_cpn ** 2), device=device,
                     )
-                    > args.c_thr
+                    >= args.c_thr
                 ).float()
 
             total_time += time.time() - start
@@ -142,7 +141,7 @@ def test():
                                     (selected_indices.sum(), args.num_windows_fpn ** 2),
                                     device=device,
                                 )
-                                > args.f_thr
+                                >= args.f_thr
                             ).float()
 
                         total_time += time.time() - start
@@ -165,9 +164,16 @@ def test():
                     )
 
     # Compute the Precision and Recall Performance of the Agent and Detectors
-    true_positives, pred_scores, pred_labels = [
-        np.concatenate(x, 0) for x in list(zip(*metrics))
-    ]
+    true_positives, pred_scores, pred_labels = (
+        np.empty((0)),
+        np.empty((0)),
+        np.empty((0)),
+    )
+    if len(metrics) > 0:
+        true_positives, pred_scores, pred_labels = [
+            np.concatenate(x, 0) for x in list(zip(*metrics))
+        ]
+
     _, recall, AP, _, _ = utils_detector.ap_per_class(
         true_positives, pred_scores, pred_labels, set_labels
     )

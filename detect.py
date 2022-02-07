@@ -3,8 +3,8 @@ This function runs object detection on the given high resolution image.
 How to Run on the xView Dataset:
     python detect.py \
         --img_path data/your_dataset/images/100.tif \
-        --load_fpn model/fd_fpn \
-        --load_cpn model/fd_cpn
+        --load_fpn model/fpn \
+        --load_cpn model/cpn
 """
 import torch
 import numpy as np
