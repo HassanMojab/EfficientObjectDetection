@@ -111,8 +111,11 @@ def test():
                         (policy_cpn.shape[0], args.num_windows_fpn ** 2), device=device
                     )
                     index_ft = xind * args.num_windows_cpn + yind
+
+                    # The images indices that the (xind, yind) patch of them is selected by the CPN
                     selected_indices = policy_cpn[:, index_ft] != 0
 
+                    # If there is any (xind, yind) patch of images is selected
                     if selected_indices.any():
                         policy_fpn[selected_indices] = torch.ones(
                             (selected_indices.sum(), args.num_windows_fpn ** 2),
@@ -137,7 +140,7 @@ def test():
                             policy_fpn[policy_fpn >= 0.5] = 1.0
 
                         if args.random:
-                            policy_fpn = (
+                            policy_fpn[selected_indices] = (
                                 torch.rand(
                                     (selected_indices.sum(), args.num_windows_fpn ** 2),
                                     device=device,
