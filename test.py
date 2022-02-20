@@ -114,11 +114,12 @@ def test():
                     selected_indices = policy_cpn[:, index_ft] != 0
 
                     if selected_indices.any():
-                        start = time.time()
                         policy_fpn[selected_indices] = torch.ones(
                             (selected_indices.sum(), args.num_windows_fpn ** 2),
                             device=device,
                         )
+
+                        start = time.time()
 
                         if args.load_fpn:
                             inputs_fpn = inputs_cpn[
@@ -151,8 +152,9 @@ def test():
                     # Compute the Batch-wise metrics
                     targets_ind = [
                         "{}_{}_{}".format(
-                            str(targets[0].numpy().tolist()), str(xind), str(yind)
+                            str(targets[i].numpy().tolist()), str(xind), str(yind)
                         )
+                        for i in range(len(targets))
                     ]
 
                     metrics, set_labels = utils.get_detected_boxes(
@@ -186,7 +188,9 @@ def test():
 
 
 # --------------------------------------------------------------------------------------------------------#
-_, testset = utils.get_dataset(args.img_size_cpn, args.data_dir, num_act=args.num_windows_cpn ** 2)
+_, testset = utils.get_dataset(
+    args.img_size_cpn, args.data_dir, num_act=args.num_windows_cpn ** 2
+)
 testloader = torchdata.DataLoader(
     testset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
 )
